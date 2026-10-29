@@ -139,6 +139,8 @@ body {
   transition: all 0.2s;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .module-card:hover:not(.locked) {
@@ -156,7 +158,7 @@ body {
 .module-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 16px;
 }
 
@@ -173,6 +175,7 @@ body {
   font-size: 0.85rem;
   color: var(--text-muted);
   font-weight: 600;
+  line-height: 48px;
 }
 
 .module-title {
@@ -186,6 +189,7 @@ body {
   color: var(--text-secondary);
   margin-bottom: 16px;
   line-height: 1.5;
+  flex: 1;
 }
 
 .module-meta {

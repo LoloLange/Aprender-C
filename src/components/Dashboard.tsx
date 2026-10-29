@@ -93,7 +93,6 @@ export default function Dashboard({ progress }: Props) {
                 <div className="module-icon" style={{ background: `${difficultyColors[mod.difficulty]}22`, color: difficultyColors[mod.difficulty] }}>
                   <Icon size={24} />
                 </div>
-                <span className="module-number">{index + 1}</span>
               </div>
 
               <h3 className="module-title">{mod.title}</h3>
