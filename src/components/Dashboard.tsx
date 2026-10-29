@@ -74,9 +74,10 @@ export default function Dashboard({ progress }: Props) {
         {modules.map((mod, index) => {
           const Icon = iconMap[mod.icon] || BookOpen;
           const percent = getModuleCompletionPercent(progress, mod.id, mod.lessons.length);
-          const isLocked = mod.prerequisites.some(
-            prereq => getModuleCompletionPercent(progress, prereq, modules.find(m => m.id === prereq)?.lessons.length ?? 0) < 100
-          );
+          const prevMod = index > 0 ? modules[index - 1] : null;
+          const isLocked = prevMod
+            ? getModuleCompletionPercent(progress, prevMod.id, prevMod.lessons.length) < 100
+            : false;
 
           return (
             <div
