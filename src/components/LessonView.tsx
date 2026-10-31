@@ -203,7 +203,13 @@ export default function LessonView({ progress, onProgressChange }: Props) {
                 {isExerciseCompleted && <CheckCircle size={16} className="completed-icon" />}
                 <p>{exercise.instruction}</p>
               </div>
-              <EditorPanel code={editorCode} onRun={handleRun} running={running} />
+              <EditorPanel
+                code={editorCode}
+                onRun={handleRun}
+                running={running}
+                hintLabel={hintsUsed < exercise.hints.length ? `Pista (${hintsUsed}/${exercise.hints.length})` : undefined}
+                onRequestHint={hintsUsed < exercise.hints.length ? handleHint : undefined}
+              />
               <HintSystem
                 hints={exercise.hints}
                 hintsUsed={hintsUsed}

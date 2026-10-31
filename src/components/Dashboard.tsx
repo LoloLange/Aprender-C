@@ -5,7 +5,7 @@ import { getModuleCompletionPercent, getTotalCompletionPercent } from '../store/
 import {
   Rocket, Database, GitBranch, Box, LayoutList, Type, Navigation,
   HardDrive, Binary, Boxes, FileText, FolderTree, Pointer, Bug, ChevronRight,
-  BookOpen, Trophy,
+  BookOpen, Trophy, Lock,
   type LucideIcon
 } from 'lucide-react';
 
@@ -18,10 +18,16 @@ interface Props {
   progress: CourseProgress;
 }
 
-const difficultyColors: Record<string, string> = {
-  'Principiante': 'var(--color-green)',
-  'Intermedio': 'var(--color-yellow)',
-  'Avanzado': 'var(--color-red)',
+const difficultyIconClass: Record<string, string> = {
+  'Principiante': 'green',
+  'Intermedio': 'yellow',
+  'Avanzado': 'red',
+};
+
+const difficultyBadgeClass: Record<string, string> = {
+  'Principiante': 'principiante',
+  'Intermedio': 'intermedio',
+  'Avanzado': 'avanzado',
 };
 
 export default function Dashboard({ progress }: Props) {
@@ -41,83 +47,106 @@ export default function Dashboard({ progress }: Props) {
     }
   }
 
+  const grouped = {
+    'Principiante': modules.filter(m => m.difficulty === 'Principiante'),
+    'Intermedio': modules.filter(m => m.difficulty === 'Intermedio'),
+    'Avanzado': modules.filter(m => m.difficulty === 'Avanzado'),
+  };
+
   return (
     <div className="dashboard">
       <header className="dashboard-header">
         <div className="dashboard-header-content">
           <div className="dashboard-title-row">
-            <BookOpen size={32} />
-            <h1>Aprender C</h1>
+            <div className="dashboard-title-group">
+              <h1>Aprender <span>C</span></h1>
+              <p className="dashboard-subtitle">
+                Plataforma interactiva — Fundamentos de Programación (TB021) - Essaya
+              </p>
+            </div>
+            <button className="continue-btn" onClick={handleContinue}>
+              {progress.lastVisited ? 'Continuar donde dejaste' : 'Empezar a aprender'}
+              <ChevronRight size={18} />
+            </button>
           </div>
-          <p className="dashboard-subtitle">
-            Plataforma interactiva de programación en C — Fundamentos de Programación (TB021)
-          </p>
 
           <div className="progress-section">
+            <span className="progress-label">Progreso general</span>
             <div className="progress-bar-container">
               <div className="progress-bar" style={{ width: `${totalPercent}%` }} />
             </div>
-            <div className="progress-info">
-              <span>{totalPercent}% completado</span>
-              <span>{progress.totalExercisesCompleted} ejercicios resueltos</span>
-            </div>
+            <span className="progress-pct">{totalPercent}%</span>
           </div>
-
-          <button className="continue-btn" onClick={handleContinue}>
-            {progress.lastVisited ? 'Continuar donde dejaste' : 'Empezar a aprender'}
-            <ChevronRight size={20} />
-          </button>
         </div>
       </header>
 
-      <main className="modules-grid">
-        {modules.map((mod, index) => {
-          const Icon = iconMap[mod.icon] || BookOpen;
-          const percent = getModuleCompletionPercent(progress, mod.id, mod.lessons.length);
-          const prevMod = index > 0 ? modules[index - 1] : null;
-          const isLocked = prevMod
-            ? getModuleCompletionPercent(progress, prevMod.id, prevMod.lessons.length) < 100
-            : false;
-
+      <main className="modules-section">
+        {(Object.entries(grouped) as [string, typeof modules][]).map(([difficulty, mods]) => {
+          if (mods.length === 0) return null;
           return (
-            <div
-              key={mod.id}
-              className={`module-card ${isLocked ? 'locked' : ''}`}
-              onClick={() => {
-                if (!isLocked && mod.lessons[0]) {
-                  navigate(`/lesson/${mod.id}/${mod.lessons[0].id}`);
-                }
-              }}
-            >
-              <div className="module-card-header">
-                <div className="module-icon" style={{ background: `${difficultyColors[mod.difficulty]}22`, color: difficultyColors[mod.difficulty] }}>
-                  <Icon size={24} />
-                </div>
+            <div key={difficulty}>
+              <h2 className="section-label">{difficulty}</h2>
+              <div className="modules-grid">
+                {mods.map((mod) => {
+                  const Icon = iconMap[mod.icon] || BookOpen;
+                  const percent = getModuleCompletionPercent(progress, mod.id, mod.lessons.length);
+                  const modIndex = modules.indexOf(mod);
+                  const prevMod = modIndex > 0 ? modules[modIndex - 1] : null;
+                  const isLocked = prevMod
+                    ? getModuleCompletionPercent(progress, prevMod.id, prevMod.lessons.length) < 100
+                    : false;
+
+                  return (
+                    <div
+                      key={mod.id}
+                      className={`module-card ${isLocked ? 'locked' : ''}`}
+                      onClick={() => {
+                        if (!isLocked && mod.lessons[0]) {
+                          navigate(`/lesson/${mod.id}/${mod.lessons[0].id}`);
+                        }
+                      }}
+                    >
+                      <div className="module-card-header">
+                        <div className={`module-icon ${difficultyIconClass[mod.difficulty]}`}>
+                          <Icon size={20} />
+                        </div>
+                        <span className={`difficulty-badge ${difficultyBadgeClass[mod.difficulty]}`}>
+                          {mod.difficulty}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="module-title">{mod.title}</h3>
+                        <p className="module-desc">{mod.description}</p>
+                      </div>
+
+                      <div className="module-footer">
+                        <div className="module-progress-bar-container">
+                          <div
+                            className={`module-progress-bar ${percent === 100 ? 'complete' : ''}`}
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                        <span className="module-meta">
+                          {mod.lessons.length} {mod.lessons.length === 1 ? 'lección' : 'lecciones'}
+                        </span>
+                      </div>
+
+                      {percent === 100 && (
+                        <div className="module-complete-badge">
+                          <Trophy size={12} /> Completado
+                        </div>
+                      )}
+
+                      {isLocked && (
+                        <div className="module-lock-overlay">
+                          <Lock size={24} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-
-              <h3 className="module-title">{mod.title}</h3>
-              <p className="module-desc">{mod.description}</p>
-
-              <div className="module-meta">
-                <span className="module-difficulty" style={{ color: difficultyColors[mod.difficulty] }}>
-                  {mod.difficulty}
-                </span>
-                <span className="module-lessons">{mod.lessons.length} {mod.lessons.length === 1 ? 'lección' : 'lecciones'}</span>
-              </div>
-
-              {percent > 0 && (
-                <div className="module-progress-bar-container">
-                  <div className="module-progress-bar" style={{ width: `${percent}%` }} />
-                </div>
-              )}
-
-              {percent === 100 && (
-                <div className="module-complete-badge">
-                  <Trophy size={14} /> Completado
-                </div>
-              )}
-
-              {isLocked && <div className="module-lock-overlay">Completá los módulos anteriores</div>}
             </div>
           );
         })}

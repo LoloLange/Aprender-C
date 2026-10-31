@@ -13,7 +13,7 @@ function createConfetti(canvas: HTMLCanvasElement) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const colors = ['#6c8cff', '#4ade80', '#facc15', '#f87171', '#a78bfa', '#fb923c', '#22d3ee'];
+  const colors = ['#6e8eff', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#fb923c', '#22d3ee'];
   const particles: { x: number; y: number; w: number; h: number; color: string; vx: number; vy: number; rot: number; vr: number; opacity: number }[] = [];
 
   for (let i = 0; i < 150; i++) {

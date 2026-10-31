@@ -8,10 +8,11 @@ interface Props {
   onRequestHint: () => void;
 }
 
-export default function HintSystem({ hints, hintsUsed, solution, onRequestHint }: Props) {
+export default function HintSystem({ hints, hintsUsed, solution }: Props) {
   const [showSolution, setShowSolution] = useState(false);
-  const maxHints = hints.length;
-  const allHintsUsed = hintsUsed >= maxHints;
+  const allHintsUsed = hintsUsed >= hints.length;
+
+  if (hintsUsed === 0 && !allHintsUsed) return null;
 
   return (
     <div className="hint-system">
@@ -26,19 +27,14 @@ export default function HintSystem({ hints, hintsUsed, solution, onRequestHint }
         </div>
       )}
 
-      <div className="hint-actions">
-        {!allHintsUsed ? (
-          <button className="hint-btn" onClick={onRequestHint}>
-            <Lightbulb size={16} />
-            Pista ({hintsUsed}/{maxHints})
-          </button>
-        ) : (
+      {allHintsUsed && (
+        <div className="hint-actions">
           <button className="solution-btn" onClick={() => setShowSolution(!showSolution)}>
             {showSolution ? <EyeOff size={16} /> : <Eye size={16} />}
             {showSolution ? 'Ocultar solución' : 'Ver solución'}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {showSolution && solution && (
         <div className="solution-preview">

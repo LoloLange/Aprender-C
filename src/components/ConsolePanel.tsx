@@ -9,10 +9,13 @@ interface Props {
 }
 
 export default function ConsolePanel({ output, error, result, running }: Props) {
+  const passedCount = result?.testResults.filter(t => t.passed).length ?? 0;
+  const failedCount = result?.testResults.filter(t => !t.passed).length ?? 0;
+
   return (
     <div className="console-panel">
       <div className="panel-header console-header">
-        <Terminal size={18} />
+        <Terminal size={16} />
         <span>Consola</span>
       </div>
       <div className="console-content">
@@ -39,31 +42,27 @@ export default function ConsolePanel({ output, error, result, running }: Props) 
 
         {result && !running && (
           <div className="test-results">
-            <div className={`test-summary ${result.passed ? 'passed' : 'failed'}`}>
-              {result.passed ? (
-                <>
-                  <CheckCircle size={20} />
-                  <span>Todos los tests pasaron</span>
-                </>
-              ) : (
-                <>
-                  <XCircle size={20} />
-                  <span>Algunos tests fallaron</span>
-                </>
-              )}
+            <div className="test-summary">
+              <span className="sum-pass">{passedCount} pasaron</span>
+              <span className="sum-sep">/</span>
+              <span className="sum-fail">{failedCount} fallaron</span>
             </div>
             {result.testResults.map((tr, i) => (
-              <div key={i} className={`test-case ${tr.passed ? 'passed' : 'failed'}`}>
-                <div className="test-case-header">
+              <div key={i} className={`test-result ${tr.passed ? 'pass' : 'fail'}`}>
+                <div className={`test-icon ${tr.passed ? 'pass' : 'fail'}`}>
                   {tr.passed ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                  <span>{tr.description}</span>
                 </div>
-                {!tr.passed && (
-                  <div className="test-case-detail">
-                    <div><strong>Esperado:</strong> <code>{tr.expected}</code></div>
-                    <div><strong>Obtenido:</strong> <code>{tr.got}</code></div>
-                  </div>
-                )}
+                <div className="test-info">
+                  <span className="test-name">{tr.description}</span>
+                  {!tr.passed && (
+                    <span className="test-detail error">
+                      Esperado: {tr.expected} — Obtenido: {tr.got}
+                    </span>
+                  )}
+                  {tr.passed && (
+                    <span className="test-detail">Correcto</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

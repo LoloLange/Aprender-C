@@ -5,15 +5,17 @@ import { keymap } from '@codemirror/view';
 import { indentWithTab } from '@codemirror/commands';
 import { cpp } from '@codemirror/lang-cpp';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { Code } from 'lucide-react';
+import { Code, Play, Lightbulb } from 'lucide-react';
 
 interface Props {
   code: string;
   onRun: (code: string) => void;
   running: boolean;
+  hintLabel?: string;
+  onRequestHint?: () => void;
 }
 
-export default function EditorPanel({ code, onRun, running }: Props) {
+export default function EditorPanel({ code, onRun, running, hintLabel, onRequestHint }: Props) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onRunRef = useRef(onRun);
@@ -49,8 +51,8 @@ export default function EditorPanel({ code, onRun, running }: Props) {
         oneDark,
         EditorView.theme({
           '&': { height: '100%', fontSize: '14px' },
-          '.cm-scroller': { overflow: 'auto', fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace" },
-          '.cm-content': { minHeight: '200px' },
+          '.cm-scroller': { overflow: 'auto', fontFamily: "var(--font-mono)" },
+          '.cm-content': { minHeight: '120px' },
         }),
       ],
     });
@@ -68,14 +70,24 @@ export default function EditorPanel({ code, onRun, running }: Props) {
     <div className="editor-panel">
       <div className="panel-header editor-header">
         <div className="panel-header-left">
-          <Code size={18} />
+          <Code size={16} />
           <span>Editor</span>
         </div>
-        <button className="run-btn" onClick={() => onRun(getCode())} disabled={running}>
-          {running ? 'Compilando...' : '▶ Ejecutar (Ctrl+Enter)'}
-        </button>
+        <span className="editor-filename">main.c</span>
       </div>
       <div ref={editorRef} className="editor-container" />
+      <div className="editor-actions">
+        <button className="btn-run" onClick={() => onRun(getCode())} disabled={running}>
+          <Play size={14} />
+          {running ? 'Compilando...' : 'Ejecutar'}
+        </button>
+        {hintLabel && onRequestHint && (
+          <button className="btn-hint" onClick={onRequestHint}>
+            <Lightbulb size={14} />
+            {hintLabel}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
