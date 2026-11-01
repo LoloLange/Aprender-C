@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import LessonView from './components/LessonView';
+import ProjectView from './components/ProjectView';
 import type { CourseProgress } from './types';
 import { loadProgress, saveProgress } from './store/progress';
 import './App.css';
@@ -25,6 +26,7 @@ function App() {
           path="/lesson/:moduleId/:lessonId"
           element={<LessonView progress={progress} onProgressChange={handleProgressChange} />}
         />
+        <Route path="/project/:projectId" element={<ProjectView />} />
       </Routes>
     </BrowserRouter>
   );

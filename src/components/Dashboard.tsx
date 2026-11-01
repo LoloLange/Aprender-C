@@ -1,17 +1,24 @@
 import { useNavigate } from 'react-router-dom';
 import { modules } from '../data/modules';
+import { projects } from '../data/projects';
 import type { CourseProgress } from '../types';
 import { getModuleCompletionPercent, getTotalCompletionPercent } from '../store/progress';
 import {
   Rocket, Database, GitBranch, Box, LayoutList, Type, Navigation,
   HardDrive, Binary, Boxes, FileText, FolderTree, Pointer, Bug, ChevronRight,
-  BookOpen, Trophy, Lock,
+  BookOpen, Trophy, Lock, FolderKanban,
+  Calculator, Thermometer, Grid3x3, Users, Shield, BarChart3, Link, Cpu,
   type LucideIcon
 } from 'lucide-react';
 
 const iconMap: Record<string, LucideIcon> = {
   Rocket, Database, GitBranch, Box, LayoutList, Type, Navigation,
   HardDrive, Binary, Boxes, FileText, FolderTree, Pointer, Bug,
+};
+
+const projectIconMap: Record<string, LucideIcon> = {
+  Calculator, Thermometer, Grid: Grid3x3, Users, Shield, BarChart: BarChart3,
+  Link, FileText, Cpu,
 };
 
 interface Props {
@@ -151,6 +158,57 @@ export default function Dashboard({ progress }: Props) {
           );
         })}
       </main>
+
+      <section className="projects-section">
+        <div className="projects-section-header">
+          <FolderKanban size={22} />
+          <h2>Mini Proyectos</h2>
+        </div>
+        <p className="projects-section-desc">
+          Poné en práctica lo aprendido con proyectos integradores por nivel.
+        </p>
+        {(['Principiante', 'Intermedio', 'Avanzado'] as const).map(diff => {
+          const projs = projects.filter(p => p.difficulty === diff);
+          if (projs.length === 0) return null;
+          const levelMods = modules.filter(m => m.difficulty === diff);
+          const levelCompleted = levelMods.length > 0 && levelMods.every(
+            m => getModuleCompletionPercent(progress, m.id, m.lessons.length) === 100
+          );
+          return (
+            <div key={diff}>
+              <h3 className="section-label">{diff}</h3>
+              <div className="projects-grid">
+                {projs.map(proj => {
+                  const PIcon = projectIconMap[proj.icon] || BookOpen;
+                  return (
+                    <div
+                      key={proj.id}
+                      className={`project-card ${!levelCompleted ? 'locked' : ''}`}
+                      onClick={() => { if (levelCompleted) navigate(`/project/${proj.id}`); }}
+                    >
+                      <div className="project-card-icon">
+                        <PIcon size={20} />
+                      </div>
+                      <div className="project-card-body">
+                        <h4>{proj.title}</h4>
+                        <p>{proj.description}</p>
+                      </div>
+                      <span className={`difficulty-badge ${diff === 'Principiante' ? 'principiante' : diff === 'Intermedio' ? 'intermedio' : 'avanzado'}`}>
+                        {diff}
+                      </span>
+                      {!levelCompleted && (
+                        <div className="module-lock-overlay">
+                          <Lock size={24} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </section>
     </div>
   );
 }
