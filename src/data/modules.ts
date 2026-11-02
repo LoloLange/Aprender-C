@@ -856,6 +856,19 @@ while (condicion) {
 }</code></pre>
 <p>El operador <code>i++</code> incrementa <code>i</code> en 1 (equivale a <code>i = i + 1</code>). También existe <code>i--</code> para decrementar, y <code>i += 3</code> para sumar cualquier cantidad.</p>
 
+<h3>Pre y post incremento</h3>
+<p>La diferencia entre <code>i++</code> y <code>++i</code> está en <strong>cuándo</strong> se actualiza el valor:</p>
+<ul>
+<li><code>i++</code> (post): usa el valor actual y <strong>después</strong> incrementa</li>
+<li><code>++i</code> (pre): incrementa <strong>primero</strong> y después usa el nuevo valor</li>
+</ul>
+<pre><code class="language-c">int i = 5;
+int x = i++;  // x = 5, i = 6 (usó el valor viejo)
+
+int j = 5;
+int y = ++j;  // y = 6, j = 6 (incrementó antes de usar)</code></pre>
+<p>Lo mismo aplica para el decremento: <code>i--</code> y <code>--i</code>. En un <code>for</code> común no importa cuál uses porque el incremento se ejecuta solo, pero en expresiones como <code>x = i++</code> la diferencia es clave.</p>
+
 <h3>Ciclos anidados</h3>
 <p>Un ciclo dentro de otro permite recorrer combinaciones, como filas y columnas:</p>
 <pre><code class="language-c">for (int fila = 0; fila &lt; 3; fila++) {
@@ -1794,6 +1807,27 @@ free(p);  // liberar la memoria cuando ya no la necesitamos</code></pre>
 <pre><code class="language-c">int *p = calloc(200, sizeof(int));  // como malloc, pero inicializa todo a 0
 p = realloc(p, 400 * sizeof(int));  // agranda (o achica) el bloque de memoria</code></pre>
 <p><code>calloc</code> es útil cuando querés que la memoria empiece en cero. <code>realloc</code> permite cambiar el tamaño de un bloque ya reservado, copiando los datos existentes al nuevo bloque.</p>
+
+<h3>Cadenas en memoria dinámica</h3>
+<p>Para copiar una cadena al heap se usa <code>strcpy</code>: primero se reserva memoria con <code>malloc</code> (longitud + 1 para el <code>'\\0'</code>) y luego se copia:</p>
+<pre><code class="language-c">char *p = malloc(10 * sizeof(char));
+strcpy(p, "hola");  // copia "hola" al bloque dinámico
+printf("%s\\n", p);  // "hola"
+free(p);</code></pre>
+<p>Recordá que no podés hacer <code>p = "hola"</code> si querés que la cadena esté en el heap: eso solo reasigna el puntero a un literal (que está en otra zona de memoria).</p>
+
+<h3>Punteros dobles</h3>
+<p>Un puntero doble (<code>char **p</code>) es un arreglo dinámico de punteros, donde cada puntero apunta a su propia zona de memoria. Se usan para arreglos de strings dinámicos o matrices cuyas filas tienen distinto largo:</p>
+<pre><code class="language-c">char **nombres = malloc(3 * sizeof(char *));
+nombres[0] = malloc(5);  strcpy(nombres[0], "Ana");
+nombres[1] = malloc(6);  strcpy(nombres[1], "Pedro");
+nombres[2] = malloc(7);  strcpy(nombres[2], "Martin");</code></pre>
+<p>El <code>free</code> debe hacerse en <strong>orden inverso</strong> al <code>malloc</code>: primero los elementos internos y después el arreglo exterior:</p>
+<pre><code class="language-c">free(nombres[0]);  // primero los internos
+free(nombres[1]);
+free(nombres[2]);
+free(nombres);      // después el exterior</code></pre>
+<p>Si liberás el arreglo exterior primero, perdés las referencias a los bloques internos (<i>memory leak</i>).</p>
 
 <h3>Errores comunes</h3>
 <div class="warning">
