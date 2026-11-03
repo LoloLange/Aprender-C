@@ -55,7 +55,9 @@ export default function LessonView({ progress, onProgressChange }: Props) {
   useEffect(() => {
     if (!exercise) return;
     const saved = lessonProg?.lastCode[exercise.id];
-    setEditorCode(saved ?? exercise.starterCode);
+    const isCompleted = lessonProg?.exercisesCompleted.includes(exercise.id);
+    const hasIndentation = saved && saved.split('\n').some(l => /^\s{2,}/.test(l));
+    setEditorCode((saved && hasIndentation) ? saved : (isCompleted ? exercise.solution : exercise.starterCode));
     setOutput('');
     setError('');
     setResult(null);
@@ -75,7 +77,7 @@ export default function LessonView({ progress, onProgressChange }: Props) {
     setError('');
     setResult(null);
 
-    onProgressChange(saveLastCode(progress, moduleId, lessonId, exercise.id, currentCode));
+    let next = saveLastCode(progress, moduleId, lessonId, exercise.id, currentCode);
 
     const res = await runTestCases(currentCode, exercise.testCases);
     setOutput(res.output);
@@ -84,14 +86,13 @@ export default function LessonView({ progress, onProgressChange }: Props) {
     setRunning(false);
 
     if (res.passed && !lessonProg?.exercisesCompleted.includes(exercise.id)) {
-      let next = markExerciseCompleted(progress, moduleId, lessonId, exercise.id);
+      next = markExerciseCompleted(next, moduleId, lessonId, exercise.id);
       const allDone = exercises.every(ex =>
         next.modules[moduleId]?.lessonsProgress[lessonId]?.exercisesCompleted.includes(ex.id)
       );
       if (allDone) {
         next = markLessonCompleted(next, moduleId, lessonId);
       }
-      onProgressChange(next);
 
       if (allDone) {
         autoAdvanceTimerRef.current = setTimeout(() => setShowCompletion(true), 1200);
@@ -102,6 +103,7 @@ export default function LessonView({ progress, onProgressChange }: Props) {
         }
       }
     }
+    onProgressChange(next);
   }, [exercise, moduleId, lessonId, exercises, exerciseIndex, progress, lessonProg, onProgressChange]);
 
   const handleHint = useCallback(() => {
