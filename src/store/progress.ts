@@ -1,4 +1,4 @@
-import type { CourseProgress, LessonProgress, ModuleProgress } from '../types';
+import type { CourseProgress, LessonProgress, ModuleProgress, ProjectProgress } from '../types';
 
 const STORAGE_KEY = 'aprender-c-progress';
 
@@ -82,6 +82,49 @@ export function getModuleCompletionPercent(progress: CourseProgress, moduleId: s
   if (!mp || totalLessons === 0) return 0;
   const completed = Object.values(mp.lessonsProgress).filter(lp => lp.completed).length;
   return Math.round((completed / totalLessons) * 100);
+}
+
+function defaultProjectProgress(projectId: string): ProjectProgress {
+  return { projectId, completed: false, exercisesCompleted: [], lastCode: {}, hintsUsed: {} };
+}
+
+function ensureProject(progress: CourseProgress, projectId: string): CourseProgress {
+  const next = structuredClone(progress);
+  if (!next.projects) next.projects = {};
+  if (!next.projects[projectId]) next.projects[projectId] = defaultProjectProgress(projectId);
+  return next;
+}
+
+export function getProjectProgress(progress: CourseProgress, projectId: string): ProjectProgress {
+  return progress.projects?.[projectId] ?? defaultProjectProgress(projectId);
+}
+
+export function saveProjectCode(progress: CourseProgress, projectId: string, exerciseId: string, code: string): CourseProgress {
+  const next = ensureProject(progress, projectId);
+  next.projects![projectId].lastCode[exerciseId] = code;
+  return next;
+}
+
+export function markProjectExerciseCompleted(progress: CourseProgress, projectId: string, exerciseId: string): CourseProgress {
+  const next = ensureProject(progress, projectId);
+  const pp = next.projects![projectId];
+  if (!pp.exercisesCompleted.includes(exerciseId)) {
+    pp.exercisesCompleted.push(exerciseId);
+  }
+  return next;
+}
+
+export function markProjectCompleted(progress: CourseProgress, projectId: string): CourseProgress {
+  const next = ensureProject(progress, projectId);
+  next.projects![projectId].completed = true;
+  return next;
+}
+
+export function incrementProjectHint(progress: CourseProgress, projectId: string, exerciseId: string): CourseProgress {
+  const next = ensureProject(progress, projectId);
+  const pp = next.projects![projectId];
+  pp.hintsUsed[exerciseId] = (pp.hintsUsed[exerciseId] ?? 0) + 1;
+  return next;
 }
 
 export function getTotalCompletionPercent(progress: CourseProgress, totalLessonsInCourse: number): number {

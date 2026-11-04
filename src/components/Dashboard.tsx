@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { modules } from '../data/modules';
 import { projects } from '../data/projects';
 import type { CourseProgress } from '../types';
-import { getModuleCompletionPercent, getTotalCompletionPercent } from '../store/progress';
+import { getModuleCompletionPercent, getTotalCompletionPercent, getProjectProgress } from '../store/progress';
 import {
   Rocket, Database, GitBranch, Box, LayoutList, Type, Navigation,
   HardDrive, Binary, Boxes, FileText, FolderTree, Pointer, Bug, ChevronRight,
@@ -177,25 +177,51 @@ export default function Dashboard({ progress }: Props) {
           return (
             <div key={diff}>
               <h3 className="section-label">{diff}</h3>
-              <div className="projects-grid">
+              <div className="modules-grid">
                 {projs.map(proj => {
                   const PIcon = projectIconMap[proj.icon] || BookOpen;
+                  const projProg = getProjectProgress(progress, proj.id);
+                  const projExCount = proj.exercises.length;
+                  const projDoneCount = projProg.exercisesCompleted.length;
+                  const projPercent = projExCount > 0 ? Math.round((projDoneCount / projExCount) * 100) : 0;
                   return (
                     <div
                       key={proj.id}
-                      className={`project-card ${!levelCompleted ? 'locked' : ''}`}
+                      className={`module-card ${!levelCompleted ? 'locked' : ''}`}
                       onClick={() => { if (levelCompleted) navigate(`/project/${proj.id}`); }}
                     >
-                      <div className="project-card-icon">
-                        <PIcon size={20} />
+                      <div className="module-card-header">
+                        <div className={`module-icon ${difficultyIconClass[diff]}`}>
+                          <PIcon size={20} />
+                        </div>
+                        <span className={`difficulty-badge ${difficultyBadgeClass[diff]}`}>
+                          {diff}
+                        </span>
                       </div>
-                      <div className="project-card-body">
-                        <h4>{proj.title}</h4>
-                        <p>{proj.description}</p>
+
+                      <div>
+                        <h3 className="module-title">{proj.title}</h3>
+                        <p className="module-desc">{proj.description}</p>
                       </div>
-                      <span className={`difficulty-badge ${diff === 'Principiante' ? 'principiante' : diff === 'Intermedio' ? 'intermedio' : 'avanzado'}`}>
-                        {diff}
-                      </span>
+
+                      <div className="module-footer">
+                        <div className="module-progress-bar-container">
+                          <div
+                            className={`module-progress-bar ${projPercent === 100 ? 'complete' : ''}`}
+                            style={{ width: `${projPercent}%` }}
+                          />
+                        </div>
+                        <span className="module-meta">
+                          {projExCount} {projExCount === 1 ? 'etapa' : 'etapas'}
+                        </span>
+                      </div>
+
+                      {projPercent === 100 && (
+                        <div className="module-complete-badge">
+                          <Trophy size={12} /> Completado
+                        </div>
+                      )}
+
                       {!levelCompleted && (
                         <div className="module-lock-overlay">
                           <Lock size={24} />

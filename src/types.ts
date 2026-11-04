@@ -59,8 +59,17 @@ export interface ModuleProgress {
   completed: boolean;
 }
 
+export interface ProjectProgress {
+  projectId: string;
+  completed: boolean;
+  exercisesCompleted: string[];
+  lastCode: Record<string, string>;
+  hintsUsed: Record<string, number>;
+}
+
 export interface CourseProgress {
   modules: Record<string, ModuleProgress>;
+  projects?: Record<string, ProjectProgress>;
   lastVisited: { moduleId: string; lessonId: string } | null;
   totalExercisesCompleted: number;
 }

@@ -1,14 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projects } from '../data/projects';
-import type { ExerciseResult } from '../types';
+import type { CourseProgress, ExerciseResult } from '../types';
+import {
+  getProjectProgress, markProjectExerciseCompleted, markProjectCompleted,
+  saveProjectCode, incrementProjectHint
+} from '../store/progress';
 import { runTestCases } from '../compiler/ccompiler';
 import TheoryPanel from './TheoryPanel';
 import EditorPanel from './EditorPanel';
 import ConsolePanel from './ConsolePanel';
-import { ArrowLeft, CheckCircle, Lightbulb } from 'lucide-react';
+import HintSystem from './HintSystem';
+import CompletionModal from './CompletionModal';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 
-export default function ProjectView() {
+interface Props {
+  progress: CourseProgress;
+  onProgressChange: (p: CourseProgress) => void;
+}
+
+export default function ProjectView({ progress, onProgressChange }: Props) {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
@@ -22,21 +33,46 @@ export default function ProjectView() {
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [running, setRunning] = useState(false);
   const [activeTab, setActiveTab] = useState<'theory' | 'editor' | 'console'>('theory');
-  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
-  const [hintsUsed, setHintsUsed] = useState<Record<string, number>>({});
+  const [showCompletion, setShowCompletion] = useState(false);
+
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const exercise = exercises[exerciseIndex];
+  const projProg = projectId ? getProjectProgress(progress, projectId) : null;
 
-  useState(() => {
-    if (exercise) setEditorCode(exercise.starterCode);
-  });
+  useEffect(() => {
+    setExerciseIndex(0);
+    setOutput('');
+    setError('');
+    setResult(null);
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!exercise) return;
+    const saved = projProg?.lastCode[exercise.id];
+    const isCompleted = projProg?.exercisesCompleted.includes(exercise.id);
+    const hasIndentation = saved && saved.split('\n').some(l => /^\s{2,}/.test(l));
+    setEditorCode((saved && hasIndentation) ? saved : (isCompleted ? exercise.solution : exercise.starterCode));
+    setOutput('');
+    setError('');
+    setResult(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exercise?.id]);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
+    };
+  }, []);
 
   const handleRun = useCallback(async (currentCode: string) => {
-    if (!exercise) return;
+    if (!exercise || !projectId) return;
     setRunning(true);
     setOutput('');
     setError('');
     setResult(null);
+
+    let next = saveProjectCode(progress, projectId, exercise.id, currentCode);
 
     const res = await runTestCases(currentCode, exercise.testCases);
     setOutput(res.output);
@@ -44,38 +80,32 @@ export default function ProjectView() {
     setResult(res);
     setRunning(false);
 
-    if (res.passed && !completedExercises.includes(exercise.id)) {
-      setCompletedExercises(prev => [...prev, exercise.id]);
-      const nextIdx = exerciseIndex + 1;
-      if (nextIdx < exercises.length) {
-        setTimeout(() => {
-          setExerciseIndex(nextIdx);
-          setEditorCode(exercises[nextIdx].starterCode);
-          setOutput('');
-          setError('');
-          setResult(null);
-        }, 1500);
+    if (res.passed && !projProg?.exercisesCompleted.includes(exercise.id)) {
+      next = markProjectExerciseCompleted(next, projectId, exercise.id);
+      const allDone = exercises.every(ex =>
+        next.projects?.[projectId]?.exercisesCompleted.includes(ex.id)
+      );
+      if (allDone) {
+        next = markProjectCompleted(next, projectId);
+      }
+
+      if (allDone) {
+        autoAdvanceTimerRef.current = setTimeout(() => setShowCompletion(true), 1200);
+      } else {
+        const nextIdx = exerciseIndex + 1;
+        if (nextIdx < exercises.length) {
+          autoAdvanceTimerRef.current = setTimeout(() => setExerciseIndex(nextIdx), 1500);
+        }
       }
     }
-  }, [exercise, exercises, exerciseIndex, completedExercises]);
+    onProgressChange(next);
+  }, [exercise, projectId, exercises, exerciseIndex, progress, projProg, onProgressChange]);
 
   const handleHint = useCallback(() => {
-    if (!exercise) return;
-    setHintsUsed(prev => ({
-      ...prev,
-      [exercise.id]: (prev[exercise.id] ?? 0) + 1,
-    }));
-  }, [exercise]);
-
-  const handleExerciseChange = useCallback((idx: number) => {
-    setExerciseIndex(idx);
-    if (exercises[idx]) {
-      setEditorCode(exercises[idx].starterCode);
-      setOutput('');
-      setError('');
-      setResult(null);
+    if (projectId && exercise) {
+      onProgressChange(incrementProjectHint(progress, projectId, exercise.id));
     }
-  }, [exercises]);
+  }, [projectId, exercise, progress, onProgressChange]);
 
   if (!project) {
     return (
@@ -86,7 +116,8 @@ export default function ProjectView() {
     );
   }
 
-  const currentHints = exercise ? (hintsUsed[exercise.id] ?? 0) : 0;
+  const isExerciseCompleted = exercise && projProg?.exercisesCompleted.includes(exercise.id);
+  const hintsUsed = exercise ? (projProg?.hintsUsed[exercise.id] ?? 0) : 0;
 
   return (
     <div className="lesson-view">
@@ -123,10 +154,10 @@ export default function ProjectView() {
                 {exercises.map((ex, i) => (
                   <button
                     key={ex.id}
-                    className={`exercise-item ${i === exerciseIndex ? 'active' : ''} ${completedExercises.includes(ex.id) ? 'completed' : ''}`}
-                    onClick={() => handleExerciseChange(i)}
+                    className={`exercise-item ${i === exerciseIndex ? 'active' : ''} ${projProg?.exercisesCompleted.includes(ex.id) ? 'completed' : ''}`}
+                    onClick={() => setExerciseIndex(i)}
                   >
-                    {completedExercises.includes(ex.id) && <CheckCircle size={14} />}
+                    {projProg?.exercisesCompleted.includes(ex.id) && <CheckCircle size={14} />}
                     <span>{ex.title}</span>
                   </button>
                 ))}
@@ -140,28 +171,22 @@ export default function ProjectView() {
             <>
               <div className="exercise-instruction">
                 <strong>{exercise.title}</strong>
-                {completedExercises.includes(exercise.id) && <CheckCircle size={16} className="completed-icon" />}
+                {isExerciseCompleted && <CheckCircle size={16} className="completed-icon" />}
                 <p>{exercise.instruction}</p>
               </div>
               <EditorPanel
                 code={editorCode}
                 onRun={handleRun}
                 running={running}
-                hintLabel={currentHints < exercise.hints.length ? `Pista (${currentHints}/${exercise.hints.length})` : undefined}
-                onRequestHint={currentHints < exercise.hints.length ? handleHint : undefined}
+                hintLabel={hintsUsed < exercise.hints.length ? `Pista (${hintsUsed}/${exercise.hints.length})` : undefined}
+                onRequestHint={hintsUsed < exercise.hints.length ? handleHint : undefined}
               />
-              {currentHints > 0 && (
-                <div className="hint-system">
-                  <div className="hints-list">
-                    {exercise.hints.slice(0, currentHints).map((hint, i) => (
-                      <div key={i} className="hint-item">
-                        <Lightbulb size={14} />
-                        <span>{hint}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <HintSystem
+                hints={exercise.hints}
+                hintsUsed={hintsUsed}
+                solution={exercise.solution}
+                onRequestHint={handleHint}
+              />
             </>
           )}
         </div>
@@ -170,6 +195,15 @@ export default function ProjectView() {
           <ConsolePanel output={output} error={error} result={result} running={running} />
         </div>
       </div>
+
+      {showCompletion && (
+        <CompletionModal
+          lessonTitle={project.title}
+          onNextLesson={() => { setShowCompletion(false); navigate('/'); }}
+          onStay={() => setShowCompletion(false)}
+          hasNext={false}
+        />
+      )}
     </div>
   );
 }

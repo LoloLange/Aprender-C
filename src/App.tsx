@@ -26,7 +26,7 @@ function App() {
           path="/lesson/:moduleId/:lessonId"
           element={<LessonView progress={progress} onProgressChange={handleProgressChange} />}
         />
-        <Route path="/project/:projectId" element={<ProjectView />} />
+        <Route path="/project/:projectId" element={<ProjectView progress={progress} onProgressChange={handleProgressChange} />} />
       </Routes>
     </BrowserRouter>
   );
