@@ -1,14 +1,19 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Trophy, ArrowRight, X } from 'lucide-react';
 
 interface Props {
   lessonTitle: string;
   onNextLesson: () => void;
   onStay: () => void;
+  onDashboard: () => void;
   hasNext: boolean;
 }
 
-function createConfetti(canvas: HTMLCanvasElement) {
+function launchConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'confetti-canvas';
+  document.body.appendChild(canvas);
+
   const ctx = canvas.getContext('2d')!;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -31,7 +36,6 @@ function createConfetti(canvas: HTMLCanvasElement) {
     });
   }
 
-  let frame: number;
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let alive = false;
@@ -51,24 +55,22 @@ function createConfetti(canvas: HTMLCanvasElement) {
       ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
       ctx.restore();
     }
-    if (alive) frame = requestAnimationFrame(animate);
+    if (alive) {
+      requestAnimationFrame(animate);
+    } else {
+      canvas.remove();
+    }
   }
-  frame = requestAnimationFrame(animate);
-  return () => cancelAnimationFrame(frame);
+  requestAnimationFrame(animate);
 }
 
 const COUNTDOWN_SECONDS = 10;
 
-export default function CompletionModal({ lessonTitle, onNextLesson, onStay, hasNext }: Props) {
+export default function CompletionModal({ lessonTitle, onNextLesson, onStay, onDashboard, hasNext }: Props) {
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (canvasRef.current) {
-      cleanupRef.current = createConfetti(canvasRef.current);
-    }
-    return () => cleanupRef.current?.();
+    launchConfetti();
   }, []);
 
   useEffect(() => {
@@ -86,51 +88,54 @@ export default function CompletionModal({ lessonTitle, onNextLesson, onStay, has
   }, [onStay]);
 
   return (
-    <>
-      <canvas ref={canvasRef} className="confetti-canvas" />
-      <div className="completion-overlay" onClick={handleStay}>
-        <div className="completion-modal" onClick={e => e.stopPropagation()}>
-          <button className="completion-close" onClick={handleStay}>
-            <X size={20} />
-          </button>
+    <div className="completion-overlay" onClick={handleStay}>
+      <div className="completion-modal" onClick={e => e.stopPropagation()}>
+        <button className="completion-close" onClick={handleStay}>
+          <X size={20} />
+        </button>
 
-          <div className="completion-trophy">
-            <Trophy size={48} />
-          </div>
-
-          <h2>Leccion completada!</h2>
-          <p className="completion-lesson-name">{lessonTitle}</p>
-          <p className="completion-subtitle">Completaste todos los ejercicios de esta leccion.</p>
-
-          {hasNext ? (
-            <>
-              <div className="completion-countdown">
-                <span>Siguiente leccion en</span>
-                <span className="countdown-number">{countdown}</span>
-                <span>segundos</span>
-              </div>
-              <div className="completion-actions">
-                <button className="completion-next" onClick={onNextLesson}>
-                  <ArrowRight size={18} />
-                  Ir a la siguiente leccion
-                </button>
-                <button className="completion-stay" onClick={handleStay}>
-                  Quedarme aca
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="completion-subtitle">Has terminado todas las lecciones de este modulo.</p>
-              <div className="completion-actions">
-                <button className="completion-stay" onClick={handleStay}>
-                  Cerrar
-                </button>
-              </div>
-            </>
-          )}
+        <div className="completion-trophy">
+          <Trophy size={48} />
         </div>
+
+        <h2>Leccion completada!</h2>
+        <p className="completion-lesson-name">{lessonTitle}</p>
+        <p className="completion-subtitle">Completaste todos los ejercicios de esta leccion.</p>
+
+        {hasNext ? (
+          <>
+            <div className="completion-countdown">
+              <span>Siguiente leccion en</span>
+              <span className="countdown-number">{countdown}</span>
+              <span>segundos</span>
+            </div>
+            <div className="completion-actions">
+              <button className="completion-next" onClick={onNextLesson}>
+                <ArrowRight size={18} />
+                Ir a la siguiente leccion
+              </button>
+              <button className="completion-stay" onClick={onDashboard}>
+                Dashboard
+              </button>
+              <button className="completion-stay" onClick={handleStay}>
+                Quedarme aca
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="completion-subtitle">Has terminado todas las lecciones de este modulo.</p>
+            <div className="completion-actions">
+              <button className="completion-stay" onClick={onDashboard}>
+                Dashboard
+              </button>
+              <button className="completion-stay" onClick={handleStay}>
+                Cerrar
+              </button>
+            </div>
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 }

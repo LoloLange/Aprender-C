@@ -201,6 +201,7 @@ export default function ProjectView({ progress, onProgressChange }: Props) {
           lessonTitle={project.title}
           onNextLesson={() => { setShowCompletion(false); navigate('/'); }}
           onStay={() => setShowCompletion(false)}
+          onDashboard={() => { setShowCompletion(false); navigate('/'); }}
           hasNext={false}
         />
       )}

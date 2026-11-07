@@ -104,11 +104,61 @@ body {
 
 .dashboard-title-row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-200);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--surface-300);
+  color: var(--ink);
+  border-color: var(--border-default);
+}
+
+.dashboard-buttons-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.continue-btn.secondary {
+  background: var(--surface-300);
+  color: var(--ink);
+  box-shadow: none;
+  border: 1px solid var(--border-subtle);
+}
+
+.continue-btn.secondary:hover {
+  background: var(--surface-400);
+  box-shadow: none;
+  border-color: var(--border-default);
+}
+
+.continue-btn.secondary:active {
+  box-shadow: none;
 }
 
 .dashboard-title-group {

@@ -12,6 +12,7 @@ async function executeC(code: string, stdin: string): Promise<{ output: string; 
         compiler: 'gcc-head-c',
         stdin,
         options: '-Wall -std=c17',
+        'compiler-option-raw': '-lm',
       }),
     });
 

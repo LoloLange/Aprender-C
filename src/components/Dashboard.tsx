@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { modules } from '../data/modules';
 import { projects } from '../data/projects';
 import type { CourseProgress } from '../types';
@@ -6,7 +7,7 @@ import { getModuleCompletionPercent, getTotalCompletionPercent, getProjectProgre
 import {
   Rocket, Database, GitBranch, Box, LayoutList, Type, Navigation,
   HardDrive, Binary, Boxes, FileText, FolderTree, Pointer, Bug, ChevronRight,
-  BookOpen, Trophy, Lock, FolderKanban,
+  BookOpen, Trophy, Lock, FolderKanban, Sun, Moon,
   Calculator, Thermometer, Grid3x3, Users, Shield, BarChart3, Link, Cpu,
   type LucideIcon
 } from 'lucide-react';
@@ -39,6 +40,18 @@ const difficultyBadgeClass: Record<string, string> = {
 
 export default function Dashboard({ progress }: Props) {
   const navigate = useNavigate();
+  const projectsRef = useRef<HTMLElement>(null);
+
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('aprender-c-theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('aprender-c-theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
   const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
   const totalPercent = getTotalCompletionPercent(progress, totalLessons);
@@ -71,9 +84,21 @@ export default function Dashboard({ progress }: Props) {
                 Plataforma interactiva — Fundamentos de Programación (TB021) - Essaya
               </p>
             </div>
+            <div className="dashboard-header-actions">
+              <button className="theme-toggle" onClick={() => setDark(d => !d)} title={dark ? 'Modo claro' : 'Modo oscuro'}>
+                {dark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="dashboard-buttons-row">
             <button className="continue-btn" onClick={handleContinue}>
-              {progress.lastVisited ? 'Continuar donde dejaste' : 'Empezar a aprender'}
+              {progress.lastVisited ? 'Continuar aprendiendo' : 'Empezar a aprender'}
               <ChevronRight size={18} />
+            </button>
+            <button className="continue-btn secondary" onClick={() => projectsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+              <FolderKanban size={18} />
+              Ver proyectos
             </button>
           </div>
 
@@ -159,7 +184,7 @@ export default function Dashboard({ progress }: Props) {
         })}
       </main>
 
-      <section className="projects-section">
+      <section className="projects-section" ref={projectsRef}>
         <div className="projects-section-header">
           <FolderKanban size={22} />
           <h2>Mini Proyectos</h2>

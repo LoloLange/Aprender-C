@@ -232,6 +232,7 @@ export default function LessonView({ progress, onProgressChange }: Props) {
           lessonTitle={lesson.title}
           onNextLesson={handleNextLesson}
           onStay={handleStayHere}
+          onDashboard={() => { setShowCompletion(false); navigate('/'); }}
           hasNext={!!nextLesson}
         />
       )}

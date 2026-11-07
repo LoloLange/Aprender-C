@@ -1761,6 +1761,176 @@ int main(void) {
             }
           ]
         }
+      },
+      {
+        id: 'punteros-aritmetica',
+        title: 'Aritmética de punteros y punteros a arreglos',
+        description: 'Recorrer arreglos con punteros, punteros const, sizeof con punteros',
+        content: {
+          theory: `
+<h2>Aritmética de punteros</h2>
+<h3>Objetivos</h3>
+<ul>
+<li>Recorrer arreglos usando aritmética de punteros</li>
+<li>Entender <code>const</code> con punteros</li>
+<li>Diferencia entre arreglos y punteros</li>
+</ul>
+
+<h3>Avanzar por un arreglo</h3>
+<p>Cuando sumás 1 a un puntero, avanza <strong>sizeof(tipo)</strong> bytes:</p>
+<pre><code class="language-c">int arr[] = {10, 20, 30, 40, 50};
+int *p = arr;
+
+printf("%d\\n", *p);       // 10
+printf("%d\\n", *(p + 1)); // 20
+printf("%d\\n", *(p + 4)); // 50
+
+// Recorrer con puntero
+for (int *q = arr; q < arr + 5; q++) {
+    printf("%d ", *q);
+}
+// Salida: 10 20 30 40 50</code></pre>
+
+<h3>Diferencia entre punteros</h3>
+<pre><code class="language-c">int arr[] = {10, 20, 30, 40, 50};
+int *inicio = &arr[0];
+int *fin = &arr[4];
+printf("Distancia: %ld\\n", fin - inicio);  // 4 (elementos, no bytes)</code></pre>
+
+<h3>const y punteros</h3>
+<p>Hay tres combinaciones:</p>
+<pre><code class="language-c">const int *p;        // puntero a const int: no podés cambiar *p
+int *const p;        // puntero const a int: no podés cambiar p
+const int *const p;  // ambos son const</code></pre>
+<p>Regla: leé de derecha a izquierda. <code>const int *p</code> = "p es un puntero a int constante".</p>
+<pre><code class="language-c">void imprimir(const int *arr, int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    // arr[0] = 99;  // ERROR: arr apunta a const
+}</code></pre>
+
+<h3>sizeof con arreglos vs punteros</h3>
+<pre><code class="language-c">int arr[5] = {1, 2, 3, 4, 5};
+int *p = arr;
+
+printf("%zu\\n", sizeof(arr));  // 20 (5 * 4 bytes)
+printf("%zu\\n", sizeof(p));    // 8 (tamaño del puntero)
+
+// Cantidad de elementos:
+int n = sizeof(arr) / sizeof(arr[0]);  // 5</code></pre>
+<p><strong>Cuidado:</strong> cuando un arreglo se pasa a una función, "decae" a puntero y se pierde el tamaño. Por eso siempre se pasa el largo como parámetro extra.</p>`,
+          exercises: [
+            {
+              id: 'ptr-3',
+              title: 'Sumar arreglo con punteros',
+              instruction: 'Escribí una función `int sumar(const int *arr, int n)` que sume los elementos de un arreglo recorriéndolo con aritmética de punteros (sin usar arr[i]).',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+int sumar(const int *arr, int n) {
+    // Recorré con punteros, sin usar arr[i]
+
+}
+
+int main(void) {
+    int datos[] = {10, 20, 30, 40, 50};
+    printf("Suma: %d\\n", sumar(datos, 5));
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+int sumar(const int *arr, int n) {
+    int total = 0;
+    const int *fin = arr + n;
+    for (const int *p = arr; p < fin; p++) {
+        total += *p;
+    }
+    return total;
+}
+
+int main(void) {
+    int datos[] = {10, 20, 30, 40, 50};
+    printf("Suma: %d\\n", sumar(datos, 5));
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Suma: 150\n', description: 'La suma de {10,20,30,40,50} debe ser 150' }
+              ],
+              hints: [
+                'Creá un puntero al final: const int *fin = arr + n;',
+                'Recorré con for (const int *p = arr; p < fin; p++)',
+                'Sumá *p en cada iteración.'
+              ]
+            },
+            {
+              id: 'ptr-4',
+              title: 'Buscar elemento con puntero',
+              instruction: 'Escribí una función `const int *buscar(const int *arr, int n, int valor)` que devuelva un puntero al primer elemento igual a `valor`, o `NULL` si no lo encuentra.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+#include <stddef.h>
+
+const int *buscar(const int *arr, int n, int valor) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    int datos[] = {5, 12, 8, 3, 20};
+    const int *r = buscar(datos, 5, 8);
+    if (r != NULL) {
+        printf("Encontrado: %d en posicion %ld\\n", *r, r - datos);
+    } else {
+        printf("No encontrado\\n");
+    }
+    r = buscar(datos, 5, 99);
+    if (r != NULL) {
+        printf("Encontrado: %d\\n", *r);
+    } else {
+        printf("No encontrado\\n");
+    }
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stddef.h>
+
+const int *buscar(const int *arr, int n, int valor) {
+    for (const int *p = arr; p < arr + n; p++) {
+        if (*p == valor) return p;
+    }
+    return NULL;
+}
+
+int main(void) {
+    int datos[] = {5, 12, 8, 3, 20};
+    const int *r = buscar(datos, 5, 8);
+    if (r != NULL) {
+        printf("Encontrado: %d en posicion %ld\\n", *r, r - datos);
+    } else {
+        printf("No encontrado\\n");
+    }
+    r = buscar(datos, 5, 99);
+    if (r != NULL) {
+        printf("Encontrado: %d\\n", *r);
+    } else {
+        printf("No encontrado\\n");
+    }
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Encontrado: 8 en posicion 2\nNo encontrado\n', description: 'Debe encontrar 8 en posición 2 y no encontrar 99' }
+              ],
+              hints: [
+                'Recorré con un puntero p desde arr hasta arr + n.',
+                'Si *p == valor, devolvé p inmediatamente.',
+                'Si terminás el loop sin encontrar, devolvé NULL.'
+              ]
+            }
+          ]
+        }
       }
     ]
   },
@@ -2446,6 +2616,419 @@ int main(void) {
               hints: [
                 'static antes de una función la hace privada al archivo.',
                 'Sin static, la función es visible desde otros archivos (si se declara en un .h).',
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    id: 'punteros-avanzados',
+    title: 'Punteros avanzados',
+    description: 'Doble punteros, matrices dinámicas, punteros a structs y patrones avanzados.',
+    icon: 'Navigation',
+    difficulty: 'Avanzado',
+    prerequisites: ['punteros', 'memoria'],
+    lessons: [
+      {
+        id: 'doble-punteros',
+        title: 'Doble punteros (puntero a puntero)',
+        description: 'Doble indirección, modificar punteros desde funciones, arreglos de strings',
+        content: {
+          theory: `
+<h2>Doble punteros</h2>
+<h3>Objetivos</h3>
+<ul>
+<li>Entender la doble indirección (<code>**</code>)</li>
+<li>Modificar un puntero desde una función</li>
+<li>Arreglos de strings con <code>char **</code></li>
+<li><code>main(int argc, char *argv[])</code></li>
+</ul>
+
+<h3>¿Por qué doble puntero?</h3>
+<p>Si querés modificar un <code>int</code> desde una función, pasás <code>int *</code>. Si querés modificar un <strong>puntero</strong> desde una función, pasás un <strong>puntero a puntero</strong>:</p>
+<pre><code class="language-c">void asignar(int **pp, int *nuevo) {
+    *pp = nuevo;  // modifica el puntero original
+}
+
+int main(void) {
+    int a = 10, b = 20;
+    int *p = &a;
+    printf("*p = %d\\n", *p);  // 10
+
+    asignar(&p, &b);
+    printf("*p = %d\\n", *p);  // 20 (ahora p apunta a b)
+}</code></pre>
+
+<h3>Caso típico: crear memoria en una función</h3>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int crear_copia(char **destino, const char *origen) {
+    *destino = malloc(strlen(origen) + 1);
+    if (*destino == NULL) return -1;
+    strcpy(*destino, origen);
+    return 0;
+}
+
+int main(void) {
+    char *texto = NULL;
+    crear_copia(&texto, "Hola mundo");
+    printf("%s\\n", texto);  // Hola mundo
+    free(texto);
+}</code></pre>
+<p>Sin doble puntero, la función solo modificaría una <em>copia local</em> del puntero y el original quedaría en <code>NULL</code>.</p>
+
+<h3>Arreglos de strings</h3>
+<pre><code class="language-c">char *nombres[] = {"Ana", "Bob", "Carlos"};
+// nombres es un arreglo de punteros a char
+// nombres[0] apunta a "Ana"
+// nombres[1] apunta a "Bob"
+
+// Equivalente a:
+char **p = nombres;
+printf("%s\\n", p[1]);  // Bob
+printf("%c\\n", p[1][0]);  // B (primer char de "Bob")</code></pre>
+
+<h3>argv</h3>
+<pre><code class="language-c">int main(int argc, char *argv[]) {
+    // argv es char **, un arreglo de strings
+    // argv[0] = nombre del programa
+    // argv[1] = primer argumento
+    for (int i = 0; i < argc; i++) {
+        printf("argv[%d] = %s\\n", i, argv[i]);
+    }
+}</code></pre>
+
+<h3>Diagrama de memoria</h3>
+<pre><code>int x = 42;
+int *p = &x;
+int **pp = &p;
+
+pp ----> p ----> x
+[0x30]   [0x20]  [42]
+
+**pp == *p == x == 42
+*pp  == p  == &x == 0x20
+pp   == &p == 0x30</code></pre>`,
+          exercises: [
+            {
+              id: 'dptr-1',
+              title: 'Reasignar puntero desde función',
+              instruction: 'Escribí una función `void apuntar_al_mayor(int **pp, int *a, int *b)` que haga que `*pp` apunte al mayor de los dos valores.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+void apuntar_al_mayor(int **pp, int *a, int *b) {
+    // Hacé que *pp apunte al mayor
+
+}
+
+int main(void) {
+    int x = 15, y = 42;
+    int *p = NULL;
+    apuntar_al_mayor(&p, &x, &y);
+    printf("Mayor: %d\\n", *p);
+
+    int a = 100, b = 7;
+    apuntar_al_mayor(&p, &a, &b);
+    printf("Mayor: %d\\n", *p);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+void apuntar_al_mayor(int **pp, int *a, int *b) {
+    *pp = (*a > *b) ? a : b;
+}
+
+int main(void) {
+    int x = 15, y = 42;
+    int *p = NULL;
+    apuntar_al_mayor(&p, &x, &y);
+    printf("Mayor: %d\\n", *p);
+
+    int a = 100, b = 7;
+    apuntar_al_mayor(&p, &a, &b);
+    printf("Mayor: %d\\n", *p);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Mayor: 42\nMayor: 100\n', description: 'Debe apuntar al mayor de cada par' }
+              ],
+              hints: [
+                'Compará *a con *b para saber cuál es mayor.',
+                '*pp = a; hace que el puntero original apunte a donde apunta a.',
+                'Usá el operador ternario: *pp = (*a > *b) ? a : b;'
+              ]
+            },
+            {
+              id: 'dptr-2',
+              title: 'Duplicar string con doble puntero',
+              instruction: 'Escribí una función `int duplicar(char **dest, const char *src)` que reserve memoria y copie el string. Devuelve 0 si tuvo éxito, -1 si malloc falló.',
+              type: 'write',
+              difficulty: 'dificil',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int duplicar(char **dest, const char *src) {
+    // Reservá memoria y copiá el string
+
+}
+
+int main(void) {
+    char *copia = NULL;
+    if (duplicar(&copia, "Hola mundo") == 0) {
+        printf("%s\\n", copia);
+        free(copia);
+    }
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int duplicar(char **dest, const char *src) {
+    *dest = malloc(strlen(src) + 1);
+    if (*dest == NULL) return -1;
+    strcpy(*dest, src);
+    return 0;
+}
+
+int main(void) {
+    char *copia = NULL;
+    if (duplicar(&copia, "Hola mundo") == 0) {
+        printf("%s\\n", copia);
+        free(copia);
+    }
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Hola mundo\n', description: 'Debe duplicar el string correctamente' }
+              ],
+              hints: [
+                'Usá strlen(src) + 1 para saber cuántos bytes reservar.',
+                '*dest = malloc(...); asigna memoria al puntero original.',
+                'Copiá con strcpy(*dest, src);'
+              ]
+            }
+          ]
+        }
+      },
+      {
+        id: 'matrices-dinamicas',
+        title: 'Matrices dinámicas y patrones avanzados',
+        description: 'Matrices con doble puntero, realloc, patrones comunes con punteros',
+        content: {
+          theory: `
+<h2>Matrices dinámicas y patrones avanzados</h2>
+<h3>Objetivos</h3>
+<ul>
+<li>Crear matrices dinámicas con <code>int **</code></li>
+<li>Usar <code>realloc</code> para redimensionar</li>
+<li>Patrones comunes con punteros</li>
+</ul>
+
+<h3>Matriz dinámica (arreglo de arreglos)</h3>
+<pre><code class="language-c">int **crear_matriz(int filas, int cols) {
+    int **mat = malloc(filas * sizeof(int *));
+    for (int i = 0; i < filas; i++) {
+        mat[i] = malloc(cols * sizeof(int));
+    }
+    return mat;
+}
+
+void liberar_matriz(int **mat, int filas) {
+    for (int i = 0; i < filas; i++) {
+        free(mat[i]);
+    }
+    free(mat);
+}</code></pre>
+<p>Cada fila es un arreglo independiente en el heap. <code>mat[i][j]</code> funciona como una matriz normal.</p>
+
+<h3>realloc: redimensionar memoria</h3>
+<pre><code class="language-c">int *datos = malloc(4 * sizeof(int));
+datos[0] = 10; datos[1] = 20; datos[2] = 30; datos[3] = 40;
+
+// Agrandar a 8 elementos (conserva los datos existentes)
+datos = realloc(datos, 8 * sizeof(int));
+datos[4] = 50;  // los primeros 4 siguen intactos</code></pre>
+<p><strong>Cuidado:</strong> si <code>realloc</code> falla, devuelve <code>NULL</code> y la memoria original sigue válida. Por eso es mejor:</p>
+<pre><code class="language-c">int *tmp = realloc(datos, nuevo_tam);
+if (tmp == NULL) {
+    // manejar error, datos sigue válido
+} else {
+    datos = tmp;
+}</code></pre>
+
+<h3>Patrón: arreglo dinámico que crece</h3>
+<pre><code class="language-c">int *arr = NULL;
+int tam = 0, cap = 0;
+
+void agregar(int valor) {
+    if (tam == cap) {
+        cap = cap == 0 ? 4 : cap * 2;
+        arr = realloc(arr, cap * sizeof(int));
+    }
+    arr[tam++] = valor;
+}</code></pre>
+<p>Este es el patrón de <em>vector dinámico</em>: empieza chico y duplica la capacidad cuando se llena.</p>
+
+<h3>Punteros a structs (repaso rápido)</h3>
+<pre><code class="language-c">typedef struct {
+    char nombre[50];
+    int edad;
+} persona_t;
+
+persona_t *p = malloc(sizeof(persona_t));
+// Dos formas equivalentes:
+(*p).edad = 25;    // desreferenciar y acceder
+p->edad = 25;      // operador flecha (más común)
+
+// Arreglo dinámico de structs:
+persona_t *lista = malloc(n * sizeof(persona_t));
+lista[0].edad = 20;
+lista[1].edad = 25;</code></pre>`,
+          exercises: [
+            {
+              id: 'dptr-3',
+              title: 'Crear y llenar matriz dinámica',
+              instruction: 'Escribí funciones para crear una matriz de filas x cols, llenarla con la tabla de multiplicar (mat[i][j] = (i+1)*(j+1)), imprimirla y liberarla.',
+              type: 'write',
+              difficulty: 'dificil',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+
+int **crear_matriz(int filas, int cols) {
+    // Reservar memoria para la matriz
+
+}
+
+void liberar_matriz(int **mat, int filas) {
+    // Liberar toda la memoria
+
+}
+
+int main(void) {
+    int f = 3, c = 4;
+    int **mat = crear_matriz(f, c);
+
+    for (int i = 0; i < f; i++)
+        for (int j = 0; j < c; j++)
+            mat[i][j] = (i + 1) * (j + 1);
+
+    for (int i = 0; i < f; i++) {
+        for (int j = 0; j < c; j++)
+            printf("%4d", mat[i][j]);
+        printf("\\n");
+    }
+
+    liberar_matriz(mat, f);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+
+int **crear_matriz(int filas, int cols) {
+    int **mat = malloc(filas * sizeof(int *));
+    for (int i = 0; i < filas; i++) {
+        mat[i] = malloc(cols * sizeof(int));
+    }
+    return mat;
+}
+
+void liberar_matriz(int **mat, int filas) {
+    for (int i = 0; i < filas; i++) {
+        free(mat[i]);
+    }
+    free(mat);
+}
+
+int main(void) {
+    int f = 3, c = 4;
+    int **mat = crear_matriz(f, c);
+
+    for (int i = 0; i < f; i++)
+        for (int j = 0; j < c; j++)
+            mat[i][j] = (i + 1) * (j + 1);
+
+    for (int i = 0; i < f; i++) {
+        for (int j = 0; j < c; j++)
+            printf("%4d", mat[i][j]);
+        printf("\\n");
+    }
+
+    liberar_matriz(mat, f);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '   1   2   3   4\n   2   4   6   8\n   3   6   9  12\n', description: 'Tabla de multiplicar 3x4' }
+              ],
+              hints: [
+                'Primero reservá el arreglo de punteros: malloc(filas * sizeof(int *)).',
+                'Luego, para cada fila, reservá el arreglo de ints: mat[i] = malloc(cols * sizeof(int)).',
+                'Para liberar, hacé free de cada fila primero, después free del arreglo de punteros.'
+              ]
+            },
+            {
+              id: 'dptr-4',
+              title: 'Arreglo dinámico con realloc',
+              instruction: 'Leé números del stdin hasta que se ingrese 0. Guardá cada número en un arreglo dinámico que crece con realloc. Al final, imprimí todos los números.',
+              type: 'write',
+              difficulty: 'dificil',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int *arr = NULL;
+    int tam = 0, cap = 0;
+
+    int num;
+    while (scanf("%d", &num) == 1 && num != 0) {
+        // Si tam == cap, agrandar con realloc
+
+        arr[tam++] = num;
+    }
+
+    for (int i = 0; i < tam; i++) {
+        printf("%d\\n", arr[i]);
+    }
+
+    free(arr);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int *arr = NULL;
+    int tam = 0, cap = 0;
+
+    int num;
+    while (scanf("%d", &num) == 1 && num != 0) {
+        if (tam == cap) {
+            cap = cap == 0 ? 4 : cap * 2;
+            arr = realloc(arr, cap * sizeof(int));
+        }
+        arr[tam++] = num;
+    }
+
+    for (int i = 0; i < tam; i++) {
+        printf("%d\\n", arr[i]);
+    }
+
+    free(arr);
+    return 0;
+}`,
+              testCases: [
+                { input: '5\n10\n15\n20\n0\n', expectedOutput: '5\n10\n15\n20\n', description: 'Debe guardar e imprimir los números ingresados' }
+              ],
+              hints: [
+                'Empezá con cap = 0 y arr = NULL. realloc(NULL, size) es equivalente a malloc(size).',
+                'Cuando tam == cap, duplicá la capacidad: cap = cap == 0 ? 4 : cap * 2;',
+                'arr = realloc(arr, cap * sizeof(int)); redimensiona el arreglo.'
               ]
             }
           ]

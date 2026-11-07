@@ -11,6 +11,11 @@ function App() {
   const [progress, setProgress] = useState<CourseProgress>(loadProgress);
 
   useEffect(() => {
+    const saved = localStorage.getItem('aprender-c-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  }, []);
+
+  useEffect(() => {
     saveProgress(progress);
   }, [progress]);
 
