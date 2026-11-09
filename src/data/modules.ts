@@ -513,6 +513,41 @@ int main(void) {
               ]
             },
             {
+              id: 'literales-3',
+              title: 'Constantes con #define',
+              instruction: 'Definí una constante PI con #define (valor 3.14159) y una constante entera RADIO con valor 5. Calculá e imprimí el perímetro (2 * PI * RADIO) y el área (PI * RADIO * RADIO) de un círculo, ambos con 2 decimales.',
+              type: 'write',
+              difficulty: 'facil',
+              starterCode: `#include <stdio.h>
+
+// Definí las constantes acá
+
+
+int main(void) {
+    // Calculá e imprimí perímetro y área
+
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+#define PI 3.14159
+#define RADIO 5
+
+int main(void) {
+    printf("Perimetro: %.2f\\n", 2 * PI * RADIO);
+    printf("Area: %.2f\\n", PI * RADIO * RADIO);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Perimetro: 31.42\nArea: 78.54\n', description: 'Perímetro y área de un círculo de radio 5' }
+              ],
+              hints: [
+                '#define NOMBRE valor (sin = ni ;)',
+                'Perímetro = 2 * PI * radio',
+                'Área = PI * radio * radio'
+              ]
+            },
+            {
               id: 'literales-1',
               title: 'Conversión de tipos',
               instruction: 'Calculá la división de 5 / 2 de tres formas diferentes e imprimí los resultados: 1) como enteros (resultado entero), 2) casteando el dividendo a float, 3) casteando el divisor a float.',
@@ -1320,6 +1355,53 @@ int main(void) {
               ]
             },
             {
+              id: 'arr-3',
+              title: 'Buscar el mínimo y máximo',
+              instruction: 'Escribí una función `void min_max(int arr[], int n, int *min, int *max)` que encuentre el mínimo y el máximo de un arreglo, devolviendo los valores por puntero.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+void min_max(int arr[], int n, int *min, int *max) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    int nums[] = {38, 12, 77, 5, 92, 23};
+    int min, max;
+    min_max(nums, 6, &min, &max);
+    printf("Min: %d, Max: %d\\n", min, max);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+void min_max(int arr[], int n, int *min, int *max) {
+    *min = arr[0];
+    *max = arr[0];
+    for (int i = 1; i < n; i++) {
+        if (arr[i] < *min) *min = arr[i];
+        if (arr[i] > *max) *max = arr[i];
+    }
+}
+
+int main(void) {
+    int nums[] = {38, 12, 77, 5, 92, 23};
+    int min, max;
+    min_max(nums, 6, &min, &max);
+    printf("Min: %d, Max: %d\\n", min, max);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Min: 5, Max: 92\n', description: 'Debe encontrar el mínimo (5) y máximo (92)' }
+              ],
+              hints: [
+                'Inicializá *min y *max con arr[0].',
+                'Recorré desde i=1 y actualizá si encontrás un valor menor o mayor.',
+                'Usá *min y *max para modificar los valores originales.'
+              ]
+            },
+            {
               id: 'arr-2',
               title: 'Ordenamiento por selección',
               instruction: 'Implementá una función que ordene un arreglo de enteros usando selection sort. Luego imprimí el arreglo ordenado.',
@@ -1758,6 +1840,60 @@ int main(void) {
                 'Minutos = (segundos % 3600) / 60',
                 'Segundos restantes = (segundos % 3600) % 60'
               ]
+            },
+            {
+              id: 'ptr-5',
+              title: 'Ordenar tres valores',
+              instruction: 'Escribí una función `void ordenar3(int *a, int *b, int *c)` que ordene tres enteros de menor a mayor usando punteros. Podés reutilizar la función swap.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void ordenar3(int *a, int *b, int *c) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    int x = 30, y = 10, z = 20;
+    ordenar3(&x, &y, &z);
+    printf("%d %d %d\\n", x, y, z);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void ordenar3(int *a, int *b, int *c) {
+    if (*a > *b) swap(a, b);
+    if (*a > *c) swap(a, c);
+    if (*b > *c) swap(b, c);
+}
+
+int main(void) {
+    int x = 30, y = 10, z = 20;
+    ordenar3(&x, &y, &z);
+    printf("%d %d %d\\n", x, y, z);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '10 20 30\n', description: '30, 10, 20 ordenados → 10 20 30' }
+              ],
+              hints: [
+                'Compará y swap de a pares: primero a con b, luego a con c, luego b con c.',
+                'Después de las tres comparaciones, a ≤ b ≤ c.',
+                'Usá la función swap que ya está definida.'
+              ]
             }
           ]
         }
@@ -1928,6 +2064,59 @@ int main(void) {
                 'Si *p == valor, devolvé p inmediatamente.',
                 'Si terminás el loop sin encontrar, devolvé NULL.'
               ]
+            },
+            {
+              id: 'ptr-6',
+              title: 'Copiar arreglo con punteros',
+              instruction: 'Escribí una función `void copiar(int *dest, const int *src, int n)` que copie n elementos de src a dest usando aritmética de punteros (sin usar src[i] ni dest[i]).',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+void copiar(int *dest, const int *src, int n) {
+    // Copiá usando aritmética de punteros
+
+}
+
+int main(void) {
+    int origen[] = {1, 2, 3, 4, 5};
+    int destino[5];
+    copiar(destino, origen, 5);
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", destino[i]);
+    }
+    printf("\\n");
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+void copiar(int *dest, const int *src, int n) {
+    const int *fin = src + n;
+    while (src < fin) {
+        *dest = *src;
+        dest++;
+        src++;
+    }
+}
+
+int main(void) {
+    int origen[] = {1, 2, 3, 4, 5};
+    int destino[5];
+    copiar(destino, origen, 5);
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", destino[i]);
+    }
+    printf("\\n");
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '1 2 3 4 5 \n', description: 'Debe copiar {1,2,3,4,5} al destino' }
+              ],
+              hints: [
+                'Recorré con while (src < src + n) y copiá *dest = *src.',
+                'Avanzá ambos punteros: dest++ y src++.',
+                'También podés usar *dest++ = *src++ en una sola línea.'
+              ]
             }
           ]
         }
@@ -2066,6 +2255,64 @@ int main(void) {
                 'Hay dos problemas: uno con la inicialización y otro con la liberación de memoria.',
                 'Solo se inicializan 10 de los 100 elementos. Los otros 90 tienen basura.',
                 'Falta liberar la memoria con free(p) al final de la función.'
+              ]
+            },
+            {
+              id: 'mem-3',
+              title: 'Arreglo dinámico de enteros',
+              instruction: 'Escribí una función `int *crear_rango(int desde, int hasta)` que devuelva un arreglo dinámico con los números desde `desde` hasta `hasta` (inclusive). Imprimí los valores y liberá la memoria.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+
+int *crear_rango(int desde, int hasta) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    int *rango = crear_rango(3, 7);
+    if (rango != NULL) {
+        for (int i = 0; i <= 7 - 3; i++) {
+            printf("%d ", rango[i]);
+        }
+        printf("\\n");
+        free(rango);
+    }
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+
+int *crear_rango(int desde, int hasta) {
+    int n = hasta - desde + 1;
+    int *arr = malloc(n * sizeof(int));
+    if (arr == NULL) return NULL;
+    for (int i = 0; i < n; i++) {
+        arr[i] = desde + i;
+    }
+    return arr;
+}
+
+int main(void) {
+    int *rango = crear_rango(3, 7);
+    if (rango != NULL) {
+        for (int i = 0; i <= 7 - 3; i++) {
+            printf("%d ", rango[i]);
+        }
+        printf("\\n");
+        free(rango);
+    }
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '3 4 5 6 7 \n', description: 'Rango de 3 a 7' }
+              ],
+              hints: [
+                'La cantidad de elementos es hasta - desde + 1.',
+                'Reservá memoria con malloc(n * sizeof(int)).',
+                'Llenalo con arr[i] = desde + i.'
               ]
             },
             {
@@ -2217,6 +2464,109 @@ int main(void) {
                 'R está en los bits 16-23: (color & 0xFF0000) >> 16',
                 'G está en los bits 8-15: (color & 0x00FF00) >> 8',
                 'B está en los bits 0-7: color & 0x0000FF'
+              ]
+            },
+            {
+              id: 'bits-2',
+              title: 'Verificar bit encendido',
+              instruction: 'Escribí una función `int bit_encendido(unsigned int n, int pos)` que devuelva 1 si el bit en la posición `pos` está encendido, o 0 si no. El bit 0 es el menos significativo.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+int bit_encendido(unsigned int n, int pos) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    unsigned int n = 0b1010;  // 10 en decimal
+    printf("Bit 0: %d\\n", bit_encendido(n, 0));
+    printf("Bit 1: %d\\n", bit_encendido(n, 1));
+    printf("Bit 2: %d\\n", bit_encendido(n, 2));
+    printf("Bit 3: %d\\n", bit_encendido(n, 3));
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+int bit_encendido(unsigned int n, int pos) {
+    return (n >> pos) & 1;
+}
+
+int main(void) {
+    unsigned int n = 0b1010;
+    printf("Bit 0: %d\\n", bit_encendido(n, 0));
+    printf("Bit 1: %d\\n", bit_encendido(n, 1));
+    printf("Bit 2: %d\\n", bit_encendido(n, 2));
+    printf("Bit 3: %d\\n", bit_encendido(n, 3));
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Bit 0: 0\nBit 1: 1\nBit 2: 0\nBit 3: 1\n', description: '0b1010: bits 1 y 3 encendidos' }
+              ],
+              hints: [
+                'Desplazá n a la derecha pos posiciones: n >> pos.',
+                'Después hacé AND con 1 para quedarte solo con ese bit.',
+                'return (n >> pos) & 1;'
+              ]
+            },
+            {
+              id: 'bits-3',
+              title: 'Combinar flags',
+              instruction: 'Dado un enum de permisos (LEER=1, ESCRIBIR=2, EJECUTAR=4), asigná permisos de lectura y ejecución a una variable, y verificá si tiene permiso de escritura.',
+              type: 'complete',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+typedef enum {
+    LEER     = 1,  // 001
+    ESCRIBIR = 2,  // 010
+    EJECUTAR = 4,  // 100
+} permiso_t;
+
+int main(void) {
+    // Asigná permisos de lectura Y ejecución usando |
+    int permisos = 0; // completá
+
+    printf("Permisos: %d\\n", permisos);
+
+    // Verificá si tiene permiso de escritura usando &
+    if (0) { // completá la condición
+        printf("Puede escribir\\n");
+    } else {
+        printf("No puede escribir\\n");
+    }
+
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+typedef enum {
+    LEER     = 1,
+    ESCRIBIR = 2,
+    EJECUTAR = 4,
+} permiso_t;
+
+int main(void) {
+    int permisos = LEER | EJECUTAR;
+
+    printf("Permisos: %d\\n", permisos);
+
+    if (permisos & ESCRIBIR) {
+        printf("Puede escribir\\n");
+    } else {
+        printf("No puede escribir\\n");
+    }
+
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Permisos: 5\nNo puede escribir\n', description: 'LEER | EJECUTAR = 5, no tiene ESCRIBIR' }
+              ],
+              hints: [
+                'Para combinar flags usá OR: LEER | EJECUTAR.',
+                'Para verificar un flag usá AND: permisos & ESCRIBIR.',
+                'LEER(1) | EJECUTAR(4) = 5, y 5 & 2 = 0 (no tiene escritura).'
               ]
             }
           ]
@@ -2381,6 +2731,66 @@ int main(void) {
                 'p->edad es equivalente a (*p).edad',
                 'Para incrementar: p->edad++ o p->edad = p->edad + 1'
               ]
+            },
+            {
+              id: 'struct-3',
+              title: 'Arreglo de structs',
+              instruction: 'Definí un arreglo de 3 `producto_t` (con campos `nombre` y `precio`), llenalo con datos y escribí una función que reciba el arreglo y su tamaño, y devuelva el precio total.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+typedef struct {
+    char nombre[50];
+    float precio;
+} producto_t;
+
+float precio_total(producto_t productos[], int n) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    producto_t carrito[] = {
+        {"Manzana", 1.50f},
+        {"Pan", 2.75f},
+        {"Leche", 3.25f}
+    };
+    printf("Total: %.2f\\n", precio_total(carrito, 3));
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+typedef struct {
+    char nombre[50];
+    float precio;
+} producto_t;
+
+float precio_total(producto_t productos[], int n) {
+    float total = 0;
+    for (int i = 0; i < n; i++) {
+        total += productos[i].precio;
+    }
+    return total;
+}
+
+int main(void) {
+    producto_t carrito[] = {
+        {"Manzana", 1.50f},
+        {"Pan", 2.75f},
+        {"Leche", 3.25f}
+    };
+    printf("Total: %.2f\\n", precio_total(carrito, 3));
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Total: 7.50\n', description: '1.50 + 2.75 + 3.25 = 7.50' }
+              ],
+              hints: [
+                'Recorré el arreglo y sumá productos[i].precio.',
+                'Un arreglo de structs se accede con [i] y luego .campo.',
+                'float total = 0; for (...) total += productos[i].precio;'
+              ]
             }
           ]
         }
@@ -2458,6 +2868,78 @@ int leidos[5];
 fread(leidos, sizeof(int), 5, f2);
 fclose(f2);</code></pre>`,
           exercises: [
+            {
+              id: 'io-3',
+              title: 'Formatear tabla',
+              instruction: 'Imprimí una tabla formateada con printf usando anchos fijos. Mostrá 3 productos con nombre (alineado a la izquierda, 15 chars) y precio (alineado a la derecha, 8 chars con 2 decimales).',
+              type: 'write',
+              difficulty: 'facil',
+              starterCode: `#include <stdio.h>
+
+int main(void) {
+    // Imprimí la tabla con formato:
+    // %-15s %8.2f
+
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+int main(void) {
+    printf("%-15s %8.2f\\n", "Manzana", 1.50);
+    printf("%-15s %8.2f\\n", "Pan integral", 2.75);
+    printf("%-15s %8.2f\\n", "Leche entera", 3.25);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Manzana              1.50\nPan integral         2.75\nLeche entera         3.25\n', description: 'Tabla formateada con anchos fijos' }
+              ],
+              hints: [
+                '%-15s alinea a la izquierda en 15 caracteres.',
+                '%8.2f alinea a la derecha en 8 caracteres con 2 decimales.',
+                'printf("%-15s %8.2f\\n", nombre, precio);'
+              ]
+            },
+            {
+              id: 'io-2',
+              title: 'Sumar números de stdin',
+              instruction: 'Leé números enteros de stdin (uno por línea) hasta EOF y mostrá la suma total. Usá fgets y atoi.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int suma = 0;
+    char linea[32];
+
+    // Leé líneas con fgets hasta que devuelva NULL
+
+    printf("Suma: %d\\n", suma);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int suma = 0;
+    char linea[32];
+
+    while (fgets(linea, sizeof(linea), stdin) != NULL) {
+        suma += atoi(linea);
+    }
+
+    printf("Suma: %d\\n", suma);
+    return 0;
+}`,
+              testCases: [
+                { input: '10\n20\n30\n', expectedOutput: 'Suma: 60\n', description: '10 + 20 + 30 = 60' }
+              ],
+              hints: [
+                'fgets devuelve NULL cuando no hay más entrada (EOF).',
+                'atoi convierte un string a entero. Ignora el \\n al final.',
+                'while (fgets(linea, sizeof(linea), stdin) != NULL) { suma += atoi(linea); }'
+              ]
+            },
             {
               id: 'io-1',
               title: 'Función input',
@@ -2580,10 +3062,55 @@ float vector_modulo(float x, float y) {
 #endif</code></pre>`,
           exercises: [
             {
+              id: 'mod-2',
+              title: 'Include guards',
+              instruction: 'Escribí un programa que simule tener un header con include guards. Definí un `#ifndef UTILS_H` / `#define UTILS_H` / `#endif` que proteja la declaración de una función `int doble(int x)`. Implementá la función y usala.',
+              type: 'write',
+              difficulty: 'facil',
+              starterCode: `#include <stdio.h>
+
+// Simulá un header con include guards
+// #ifndef UTILS_H
+// #define UTILS_H
+// declaración de doble
+// #endif
+
+// Implementá la función doble
+
+
+int main(void) {
+    printf("%d\\n", doble(21));
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+#ifndef UTILS_H
+#define UTILS_H
+int doble(int x);
+#endif
+
+int doble(int x) {
+    return x * 2;
+}
+
+int main(void) {
+    printf("%d\\n", doble(21));
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '42\n', description: 'doble(21) = 42' }
+              ],
+              hints: [
+                '#ifndef verifica que el símbolo NO esté definido.',
+                '#define lo define para que la próxima inclusión lo salte.',
+                '#endif cierra el bloque condicional.'
+              ]
+            },
+            {
               id: 'mod-1',
               title: 'Concepto de static',
-              instruction: '¿Qué significa que una función sea static en C? Escribí un programa con una función static y otra no-static, y usá ambas desde main.',
-              type: 'concept',
+              instruction: 'Escribí una función `static int cuadrado(int x)` que devuelva x al cuadrado, y una función `int cubo(int x)` (sin static) que devuelva x al cubo. Imprimí "Cuadrado de 5: " seguido del resultado, y "Cubo de 3: " seguido del resultado.',
+              type: 'write',
               difficulty: 'medio',
               starterCode: `#include <stdio.h>
 
@@ -2616,6 +3143,60 @@ int main(void) {
               hints: [
                 'static antes de una función la hace privada al archivo.',
                 'Sin static, la función es visible desde otros archivos (si se declara en un .h).',
+              ]
+            },
+            {
+              id: 'mod-3',
+              title: 'Usar extern',
+              instruction: 'Declará una variable global `int contador` y una función `void incrementar(void)` que la incremente. Usá extern en la declaración. Llamá a incrementar 3 veces e imprimí el resultado.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+// Declaración con extern (simula un .h)
+extern int contador;
+void incrementar(void);
+
+// Definición (simula un .c)
+int contador = 0;
+
+void incrementar(void) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    incrementar();
+    incrementar();
+    incrementar();
+    printf("Contador: %d\\n", contador);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+extern int contador;
+void incrementar(void);
+
+int contador = 0;
+
+void incrementar(void) {
+    contador++;
+}
+
+int main(void) {
+    incrementar();
+    incrementar();
+    incrementar();
+    printf("Contador: %d\\n", contador);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Contador: 3\n', description: 'Después de 3 incrementos, contador = 3' }
+              ],
+              hints: [
+                'extern declara que la variable existe pero no la crea.',
+                'La definición real (sin extern) reserva la memoria.',
+                'incrementar solo necesita hacer contador++.'
               ]
             }
           ]
@@ -2713,6 +3294,46 @@ pp ----> p ----> x
 *pp  == p  == &x == 0x20
 pp   == &p == 0x30</code></pre>`,
           exercises: [
+            {
+              id: 'dptr-5',
+              title: 'Imprimir arreglo de strings',
+              instruction: 'Escribí una función `void imprimir_strings(const char *arr[], int n)` que imprima un arreglo de strings, uno por línea. Probala con un arreglo de 3 nombres.',
+              type: 'write',
+              difficulty: 'facil',
+              starterCode: `#include <stdio.h>
+
+void imprimir_strings(const char *arr[], int n) {
+    // Tu implementación
+
+}
+
+int main(void) {
+    const char *nombres[] = {"Ana", "Pedro", "Maria"};
+    imprimir_strings(nombres, 3);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+void imprimir_strings(const char *arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%s\\n", arr[i]);
+    }
+}
+
+int main(void) {
+    const char *nombres[] = {"Ana", "Pedro", "Maria"};
+    imprimir_strings(nombres, 3);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Ana\nPedro\nMaria\n', description: 'Debe imprimir los 3 nombres' }
+              ],
+              hints: [
+                'arr[i] es un const char * (un string).',
+                'Usá %s para imprimir cada string.',
+                'for (int i = 0; i < n; i++) printf("%s\\n", arr[i]);'
+              ]
+            },
             {
               id: 'dptr-1',
               title: 'Reasignar puntero desde función',
@@ -3030,6 +3651,96 @@ int main(void) {
                 'Cuando tam == cap, duplicá la capacidad: cap = cap == 0 ? 4 : cap * 2;',
                 'arr = realloc(arr, cap * sizeof(int)); redimensiona el arreglo.'
               ]
+            },
+            {
+              id: 'dptr-6',
+              title: 'Transponer matriz dinámica',
+              instruction: 'Escribí una función que reciba una matriz dinámica de 2x3 y devuelva su transpuesta (3x2). Imprimí la matriz transpuesta.',
+              type: 'write',
+              difficulty: 'dificil',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+
+int **transponer(int **mat, int filas, int cols) {
+    // Crear y devolver la transpuesta
+
+}
+
+void liberar(int **mat, int filas) {
+    for (int i = 0; i < filas; i++) free(mat[i]);
+    free(mat);
+}
+
+int main(void) {
+    int **mat = malloc(2 * sizeof(int *));
+    for (int i = 0; i < 2; i++)
+        mat[i] = malloc(3 * sizeof(int));
+
+    int val = 1;
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            mat[i][j] = val++;
+
+    int **t = transponer(mat, 2, 3);
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++)
+            printf("%d ", t[i][j]);
+        printf("\\n");
+    }
+
+    liberar(mat, 2);
+    liberar(t, 3);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+
+int **transponer(int **mat, int filas, int cols) {
+    int **t = malloc(cols * sizeof(int *));
+    for (int i = 0; i < cols; i++) {
+        t[i] = malloc(filas * sizeof(int));
+        for (int j = 0; j < filas; j++)
+            t[i][j] = mat[j][i];
+    }
+    return t;
+}
+
+void liberar(int **mat, int filas) {
+    for (int i = 0; i < filas; i++) free(mat[i]);
+    free(mat);
+}
+
+int main(void) {
+    int **mat = malloc(2 * sizeof(int *));
+    for (int i = 0; i < 2; i++)
+        mat[i] = malloc(3 * sizeof(int));
+
+    int val = 1;
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 3; j++)
+            mat[i][j] = val++;
+
+    int **t = transponer(mat, 2, 3);
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++)
+            printf("%d ", t[i][j]);
+        printf("\\n");
+    }
+
+    liberar(mat, 2);
+    liberar(t, 3);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '1 4 \n2 5 \n3 6 \n', description: 'Transpuesta de [[1,2,3],[4,5,6]]' }
+              ],
+              hints: [
+                'La transpuesta tiene cols filas y filas columnas.',
+                't[i][j] = mat[j][i]',
+                'Reservá cols filas, cada una con filas elementos.'
+              ]
             }
           ]
         }
@@ -3094,6 +3805,63 @@ char tecla = getchar();
 acciones[tecla]();</code></pre>`,
           exercises: [
             {
+              id: 'fp-3',
+              title: 'Aplicar función a arreglo',
+              instruction: 'Implementá una función aplicar que reciba un arreglo de enteros, su tamaño y un puntero a función int (*f)(int), y aplique f a cada elemento. Usala para duplicar todos los valores.',
+              type: 'write',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+int duplicar(int x) {
+    return x * 2;
+}
+
+// Implementá la función aplicar
+
+
+int main(void) {
+    int nums[] = {1, 2, 3, 4, 5};
+    int n = 5;
+
+    aplicar(nums, n, duplicar);
+
+    for (int i = 0; i < n; i++)
+        printf("%d\\n", nums[i]);
+
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+int duplicar(int x) {
+    return x * 2;
+}
+
+void aplicar(int arr[], int n, int (*f)(int)) {
+    for (int i = 0; i < n; i++)
+        arr[i] = f(arr[i]);
+}
+
+int main(void) {
+    int nums[] = {1, 2, 3, 4, 5};
+    int n = 5;
+
+    aplicar(nums, n, duplicar);
+
+    for (int i = 0; i < n; i++)
+        printf("%d\\n", nums[i]);
+
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '2\n4\n6\n8\n10\n', description: 'Cada elemento duplicado' }
+              ],
+              hints: [
+                'La firma es: void aplicar(int arr[], int n, int (*f)(int))',
+                'Recorré el arreglo y hacé arr[i] = f(arr[i]) para cada elemento.',
+                'f es un puntero a función que recibe y devuelve un int.'
+              ]
+            },
+            {
               id: 'fp-1',
               title: 'Contar con callback',
               instruction: 'Implementá la función contar que reciba una cadena y un puntero a función, y cuente cuántos caracteres cumplen con la función. Probala con isupper e islower.',
@@ -3137,6 +3905,56 @@ int main(void) {
                 'La firma es: size_t contar(const char *s, int (*f)(int))',
                 'Recorré la cadena y llamá a f(*c) para cada caracter.',
                 'Si f devuelve distinto de 0, incrementá el contador.'
+              ]
+            },
+            {
+              id: 'fp-2',
+              title: 'Ordenar con qsort',
+              instruction: 'Usá qsort para ordenar un arreglo de enteros de menor a mayor. Implementá la función de comparación.',
+              type: 'write',
+              difficulty: 'dificil',
+              starterCode: `#include <stdio.h>
+#include <stdlib.h>
+
+// Implementá la función de comparación para qsort
+
+
+int main(void) {
+    int nums[] = {42, 7, 15, 3, 28, 1};
+    int n = sizeof(nums) / sizeof(nums[0]);
+
+    qsort(nums, n, sizeof(int), comparar);
+
+    for (int i = 0; i < n; i++)
+        printf("%d\\n", nums[i]);
+
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <stdlib.h>
+
+int comparar(const void *a, const void *b) {
+    return *(const int *)a - *(const int *)b;
+}
+
+int main(void) {
+    int nums[] = {42, 7, 15, 3, 28, 1};
+    int n = sizeof(nums) / sizeof(nums[0]);
+
+    qsort(nums, n, sizeof(int), comparar);
+
+    for (int i = 0; i < n; i++)
+        printf("%d\\n", nums[i]);
+
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '1\n3\n7\n15\n28\n42\n', description: 'Arreglo ordenado de menor a mayor' }
+              ],
+              hints: [
+                'La firma de la función de comparación es: int comparar(const void *a, const void *b)',
+                'Casteá los void * a int *: *(const int *)a',
+                'Devolvé negativo si a < b, 0 si son iguales, positivo si a > b.'
               ]
             }
           ]
@@ -3187,6 +4005,49 @@ assert(n &gt; 0);  // si n <= 0, el programa aborta con un mensaje</code></pre>
 <p>Detecta errores de memoria (leaks, reads de memoria no inicializada, etc.):</p>
 <pre><code class="language-bash">$ valgrind --leak-check=full ./programa</code></pre>`,
           exercises: [
+            {
+              id: 'debug-2',
+              title: 'Usar assert',
+              instruction: 'Escribí una función int dividir(int a, int b) que divida a por b. Usá assert para verificar que b no sea 0 antes de dividir. Probá con divisiones válidas.',
+              type: 'write',
+              difficulty: 'facil',
+              starterCode: `#include <stdio.h>
+#include <assert.h>
+
+int dividir(int a, int b) {
+    // Usá assert para verificar que b != 0, luego devolvé a / b
+
+}
+
+int main(void) {
+    printf("%d\\n", dividir(10, 2));
+    printf("%d\\n", dividir(15, 3));
+    printf("%d\\n", dividir(7, 1));
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+#include <assert.h>
+
+int dividir(int a, int b) {
+    assert(b != 0);
+    return a / b;
+}
+
+int main(void) {
+    printf("%d\\n", dividir(10, 2));
+    printf("%d\\n", dividir(15, 3));
+    printf("%d\\n", dividir(7, 1));
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: '5\n5\n7\n', description: 'Divisiones válidas' }
+              ],
+              hints: [
+                'assert(condición) aborta el programa si la condición es falsa.',
+                '#include <assert.h> para usar assert.',
+                'assert(b != 0) antes de return a / b.'
+              ]
+            },
             {
               id: 'debug-1',
               title: 'Encontrar el memory leak',
@@ -3242,6 +4103,51 @@ int main(void) {
                 'La función crear_saludo usa malloc para crear la cadena en el heap.',
                 'Todo lo que se reserva con malloc debe liberarse con free.',
                 'Falta free(s1) y free(s2) en main.'
+              ]
+            },
+            {
+              id: 'debug-3',
+              title: 'Corregir acceso fuera de límites',
+              instruction: 'Este programa tiene un error de acceso fuera de los límites del arreglo. Encontralo y corregilo.',
+              type: 'fix-logic',
+              difficulty: 'medio',
+              starterCode: `#include <stdio.h>
+
+int main(void) {
+    int datos[] = {10, 20, 30, 40, 50};
+    int n = 5;
+    int suma = 0;
+
+    for (int i = 0; i <= n; i++) {
+        suma += datos[i];
+    }
+
+    printf("Suma: %d\\n", suma);
+    printf("Promedio: %d\\n", suma / n);
+    return 0;
+}`,
+              solution: `#include <stdio.h>
+
+int main(void) {
+    int datos[] = {10, 20, 30, 40, 50};
+    int n = 5;
+    int suma = 0;
+
+    for (int i = 0; i < n; i++) {
+        suma += datos[i];
+    }
+
+    printf("Suma: %d\\n", suma);
+    printf("Promedio: %d\\n", suma / n);
+    return 0;
+}`,
+              testCases: [
+                { input: '', expectedOutput: 'Suma: 150\nPromedio: 30\n', description: 'Suma y promedio correctos' }
+              ],
+              hints: [
+                'Revisá la condición del for: ¿i <= n o i < n?',
+                'Un arreglo de 5 elementos tiene índices 0 a 4, no 0 a 5.',
+                'datos[5] es acceso fuera de límites (undefined behavior).'
               ]
             }
           ]
